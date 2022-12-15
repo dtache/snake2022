@@ -102,7 +102,7 @@ void algorithm()
 	coadaX[0] = x;
 	coadaY[0] = y;
 	
-	for(int i = 1;i < nCoada ; i++) 
+	for(int i = 1; i < nCoada ; i++) 
 	{
 		prev2X = coadaX[i];
 		prev2Y = coadaY[i];
@@ -134,8 +134,8 @@ void algorithm()
 		break;
 	}
 
-	if (x >= width) x =0;else if (x <0) x = width -1;
-	if (y >= height) y = 0; else if (y < 0) y = height - 1;
+	if ((x >= width) || (x < 0)) gameover = true;
+	if ((y >= height) || (y < 0)) gameover = true;
 
 	for (int i =0; i< nCoada ;i++)
 		if (coadaX[i] == x && coadaY[i] == y) gameover = true;
@@ -157,6 +157,7 @@ int main()
 		Input ();
 		algorithm ();
 	}
+	if (gameover) cout << "GAME OVER!";
 
 	return 0;
 }
