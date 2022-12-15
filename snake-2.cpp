@@ -157,7 +157,7 @@ int main()
 		Input ();
 		algorithm ();
 	}
-	if (gameover) cout << "GAME OVER!";
+	if (gameover) cout << ">>>   GAME OVER!    <<<<";
 
 	return 0;
 }
