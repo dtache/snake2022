@@ -2,15 +2,26 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
+#include <fstream>
+#include <string>
+#include <time.h>
 
 using namespace std;
 
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+
+const WORD colors[12] =
+{
+0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
+0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
+};
+
 bool gameover;
 
-const int width = 20;
+const int width = 19;
 const int height = 17;
 
-int x, y, fructX, fructY, score;
+int m1, x, y, fructX, fructY, scor;
 
 int coadaX[100], coadaY[100]; //snake coordinates
 
@@ -20,31 +31,74 @@ enum eDirecton {STOP = 0, LEFT,RIGHT, UP, DOWN}; // Controls
 
 eDirecton dir;
 
+void gotoxy(int x, int y)
+{
+  COORD coord;
+  coord.X = x;
+  coord.Y = y;
+  SetConsoleCursorPosition(console, coord);
+}
+
+void textcolor(int i)
+{
+	SetConsoleTextAttribute(console, colors[i]);
+}
+
 void Setup() 
 {
 	gameover = false;
 	dir = STOP;
 	x = width / 2;
-	y = height / 2;
-	fructX = rand() % width; 	//setare locatie fruct
-	fructY = rand() % height; 	//setare locatie fruct 
-	score = 0;
+	y = height / 2;				//se pleaca din mijloc
+	
+	srand(time(0));
+	//setare locatie fruct
+	fructX = 3 + rand() % (width - 3);
+	fructY = 3 + rand() % (height - 3);
+	
+	scor = 0;
+	
+	ifstream fin("config.txt");
+    if (!fin.is_open())
+    {
+    	m1 = 40;
+    }
+    else 
+    {
+		fin >> m1;
+		fin.close();
+	}
 }
 
 void Draw() {
 	
-	system("cls");
-	for(int i = 0; i < width+2; i++) cout << "#";
-	cout << endl ;
-
-	for (int i = 0; i < height ; i++) 
+	//system("cls");
+	textcolor(0);
+	gotoxy(0, 0);
+	for(int i = 0; i < width+2; i++) {
+		gotoxy(i, 0); cout << "#";
+	}
+		
+	//cout << endl ;
+	for (int i = 0; i < height ; i++) 		//selecteaza linia = y
 	{
-		for (int j = 0; j < width; j++) 
+		for (int j = 0; j < width; j++)   	//scrie pe o linie = x
 		{
-			if (j == 0) cout << "#"; //pereti
-			if (i == y && j == x) cout << "*"; // coada sarpe
+			if (j == 0) { gotoxy(j, i + 1); cout << "#";} //pereti
+			
+			if (i == y && j == x) 
+			{	
+				textcolor(9);
+				gotoxy(j + 1, i + 1); cout << "*"; // coada sarpe
+				textcolor(0);
+			}
 			else 
-				if (i == fructY && j == fructX ) cout << "%"; // fructul
+				if (i == fructY && j == fructX ) 
+				{
+					textcolor(7);
+					gotoxy(j + 1 , i + 1); cout << "%"; // fructul
+					textcolor(0);
+				}
 				else 
 				{
 					bool print = false;
@@ -52,26 +106,42 @@ void Draw() {
 					{
 						if (coadaX [k] == j && coadaY [k] == i) 
 						{
-							cout << "*"; print = true;
+							textcolor(9);
+							gotoxy(j + 1, i + 1); cout << "*"; print = true;
+							textcolor(0);
 						}
 					}
-					if (!print) cout << " ";
+					if (!print) {  gotoxy(j + 1, i + 1); cout << " "; }
 				}
 
-			if (j == width -1) cout << "#";
+			if (j == width -1) 
+			{
+				gotoxy(j + 2, i + 1); cout << "#";
+			}
+			
 		}		
-		cout << endl;
+		/*cout << endl;*/
 	}
-
-	for (int i = 0; i< width+2; i++) cout << "#";
-	cout << endl;
-	cout << "Scor:" << score << endl ;
-
+	
+	for (int i = 0; i< width+2; i++) {
+		gotoxy(i, height); cout << "#";
+	}
+	textcolor(0);
+	gotoxy(0, height + 1);
+	if (scor == 0)
+	cout << "Scor: " << scor << "              "; //scad cate un blank pe fiecare cifra
+	else 
+	if (scor >= 10 && scor < 100)
+	cout << "Scor: " << scor << "             ";
+	else 
+	cout << "Scor: " << scor << "            ";
+		
 }
 
 void Input ()
 {
-	Sleep(40);
+	Sleep(m1);	
+	
 	if (_kbhit ()) {
 		switch (_getch ()) {
 			case 'a':
@@ -134,16 +204,18 @@ void algorithm()
 		break;
 	}
 
+	//game over daca ma lovesc de pereti
 	if ((x >= width) || (x < 0)) gameover = true;
 	if ((y >= height) || (y < 0)) gameover = true;
 
+	//game over daca ating coada
 	for (int i =0; i< nCoada ;i++)
 		if (coadaX[i] == x && coadaY[i] == y) gameover = true;
 
 	if (x == fructX && y == fructY) {
-		score +=10;
-		fructX = rand() % width;
-		fructY = rand() % height;
+		scor +=10;
+		fructX = 3 + rand() % (width - 3);
+		fructY = 3 + rand() % (height - 3);
 		nCoada ++;
 	}
 }
@@ -157,7 +229,8 @@ int main()
 		Input ();
 		algorithm ();
 	}
-	if (gameover) cout << ">>>   GAME OVER!    <<<<";
+	gotoxy(0, height + 4);
+	if (gameover) cout << "GAME OVER!";
 
 	return 0;
 }
