@@ -8,7 +8,7 @@
 
 using namespace std;
 
-HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE); //utilizat pentru Consola - Text (Windows)
 
 const WORD colors[12] =
 {
@@ -27,7 +27,7 @@ int coadaX[100], coadaY[100]; //snake coordinates
 
 int nCoada;
 
-enum eDirecton {STOP = 0, LEFT,RIGHT, UP, DOWN}; // Controls
+enum eDirecton {STOP = 0, LEFT, RIGHT, UP, DOWN}; // Controls
 
 eDirecton dir;
 
@@ -59,7 +59,7 @@ void Setup()
 	scor = 0;
 	
 	ifstream fin("config.txt");
-    if (!fin.is_open())
+    if (!fin.is_open()) //nu exista fisierul
     {
     	m1 = 40;
     }
@@ -72,8 +72,7 @@ void Setup()
 
 void Draw() {
 	
-	//system("cls");
-	textcolor(0);
+	textcolor(0);	//culoarea default - verde pe albastru
 	gotoxy(0, 0);
 	for(int i = 0; i < width+2; i++) {
 		gotoxy(i, 0); cout << "#";
@@ -89,7 +88,7 @@ void Draw() {
 			if (i == y && j == x) 
 			{	
 				textcolor(9);
-				gotoxy(j + 1, i + 1); cout << "*"; // coada sarpe
+				gotoxy(j + 1, i + 1); cout << "*"; // cap sarpe
 				textcolor(0);
 			}
 			else 
@@ -126,6 +125,7 @@ void Draw() {
 	for (int i = 0; i< width+2; i++) {
 		gotoxy(i, height); cout << "#";
 	}
+	//cout << endl; schimbat cu gotoxy...
 	textcolor(0);
 	gotoxy(0, height + 1);
 	if (scor == 0)
@@ -140,7 +140,7 @@ void Draw() {
 
 void Input ()
 {
-	Sleep(m1);	
+	Sleep(m1);		//pune o pauza de m1 milisecunde
 	
 	if (_kbhit ()) {
 		switch (_getch ()) {
@@ -157,8 +157,8 @@ void Input ()
 				dir = DOWN ;
 				break;
 			case 'x':
-			gameover = true;
-			break;
+				gameover = true;
+				break;
 		}
 	}
 }
@@ -222,6 +222,7 @@ void algorithm()
 
 int main()
 {
+	int i;
 	Setup();
 	while (!gameover) 
 	{
@@ -229,8 +230,20 @@ int main()
 		Input ();
 		algorithm ();
 	}
+	
+	i = -1;
+	while (true)
+	{
+		i++; 
+		gotoxy((width - 10) / 2 + 1, height / 2);
+		Sleep(60);
+		textcolor(i%12);
+		if (gameover) cout << "GAME OVER!";
+		if (_kbhit ()) break;
+	}
+	textcolor(0);
 	gotoxy(0, height + 4);
-	if (gameover) cout << "GAME OVER!";
-
+	
+	
 	return 0;
 }
